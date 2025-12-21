@@ -1,12 +1,20 @@
-namespace OrgStructureApi.Models;
+using System.ComponentModel.DataAnnotations;
 
-public class Employee
+public class EmployeeUpdateDto
 {
-    public int Id { get; set; }
-
+    [Required]
     public string Title { get; set; } = null!;
+
+    [Required]
     public string FirstName { get; set; } = null!;
+
+    [Required]
     public string LastName { get; set; } = null!;
+
+    [Required]
     public string Phone { get; set; } = null!;
+
+    [Required]
+    [EmailAddress]
     public string Email { get; set; } = null!;
 }

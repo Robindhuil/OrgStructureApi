@@ -5,15 +5,6 @@ using OrgStructureApi.Models;
 
 namespace OrgStructureApi.Controllers;
 
-public class EmployeePatchDto
-{
-    public string? Title { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-    public string? Phone { get; set; }
-    public string? Email { get; set; }
-}
-
 
 [ApiController]
 [Route("api/[controller]")]
@@ -27,39 +18,70 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+    public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(
+        string? lastName,
+        int page = 1,
+        int pageSize = 20)
     {
-        return await _context.Employees.ToListAsync();
+        var query = _context.Employees.AsQueryable();
+
+        if (!string.IsNullOrEmpty(lastName))
+            query = query.Where(e => e.LastName.Contains(lastName));
+
+        return await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
     }
 
-    [HttpPost]
-    public async Task<ActionResult<Employee>> CreateEmployee(Employee employee)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Employee>> GetEmployeeById(int id)
     {
+        var employee = await _context.Employees.FindAsync(id);
+
+        if (employee == null)
+            return NotFound();
+
+        return employee;
+    }
+
+
+    [HttpPost]
+    public async Task<ActionResult<Employee>> CreateEmployee(EmployeeCreateDto dto)
+    {
+        var employee = new Employee
+        {
+            Title = dto.Title,
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            Phone = dto.Phone,
+            Email = dto.Email
+        };
+
         _context.Employees.Add(employee);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetEmployees), new { id = employee.Id }, employee);
+        return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee);
     }
 
+
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateEmployee(int id, Employee updatedEmployee)
+    public async Task<IActionResult> UpdateEmployee(int id, EmployeeUpdateDto dto)
     {
         var employee = await _context.Employees.FindAsync(id);
         if (employee == null)
-        {
             return NotFound();
-        }
 
-        employee.Title = updatedEmployee.Title;
-        employee.FirstName = updatedEmployee.FirstName;
-        employee.LastName = updatedEmployee.LastName;
-        employee.Phone = updatedEmployee.Phone;
-        employee.Email = updatedEmployee.Email;
+        employee.Title = dto.Title;
+        employee.FirstName = dto.FirstName;
+        employee.LastName = dto.LastName;
+        employee.Phone = dto.Phone;
+        employee.Email = dto.Email;
 
         await _context.SaveChangesAsync();
-
         return NoContent();
     }
+
 
     [HttpPatch("{id}")]
     public async Task<IActionResult> PatchEmployee(int id, [FromBody] EmployeePatchDto updatedFields)
