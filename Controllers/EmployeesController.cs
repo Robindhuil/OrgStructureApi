@@ -20,6 +20,7 @@ public class EmployeesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(
         string? lastName,
+        OrgStructureApi.Models.EmployeeRole? role = null,
         int page = 1,
         int pageSize = 20)
     {
@@ -27,6 +28,8 @@ public class EmployeesController : ControllerBase
 
         if (!string.IsNullOrEmpty(lastName))
             query = query.Where(e => e.LastName.Contains(lastName));
+        if (role.HasValue)
+            query = query.Where(e => e.Role == role.Value);
 
         return await query
             .Skip((page - 1) * pageSize)
@@ -55,7 +58,8 @@ public class EmployeesController : ControllerBase
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             Phone = dto.Phone,
-            Email = dto.Email
+            Email = dto.Email,
+            Role = dto.Role
         };
 
         _context.Employees.Add(employee);
@@ -77,6 +81,7 @@ public class EmployeesController : ControllerBase
         employee.LastName = dto.LastName;
         employee.Phone = dto.Phone;
         employee.Email = dto.Email;
+        employee.Role = dto.Role;
 
         await _context.SaveChangesAsync();
         return NoContent();
@@ -103,6 +108,9 @@ public class EmployeesController : ControllerBase
 
         if (!string.IsNullOrEmpty(updatedFields.Email))
             employee.Email = updatedFields.Email;
+
+        if (updatedFields.Role.HasValue)
+            employee.Role = updatedFields.Role.Value;
 
         await _context.SaveChangesAsync();
         return NoContent();

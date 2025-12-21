@@ -18,4 +18,6 @@ public class EmployeeCreateDto
     [Required]
     [EmailAddress]
     public string Email { get; set; } = null!;
+
+    public OrgStructureApi.Models.EmployeeRole Role { get; set; } = OrgStructureApi.Models.EmployeeRole.RegularEmployee;
 }
