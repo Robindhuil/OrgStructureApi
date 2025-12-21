@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using OrgStructureApi.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        "Server=localhost,1433;Database=OrgDb;User Id=sa;Password=Heslo123!;TrustServerCertificate=True"
+    ));
 
 
 var app = builder.Build();
