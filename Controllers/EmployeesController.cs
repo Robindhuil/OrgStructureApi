@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OrgStructureApi.Data;
 using OrgStructureApi.Models;
+using OrgStructureApi.Helpers;
 
 namespace OrgStructureApi.Controllers;
 
@@ -24,7 +25,8 @@ public class EmployeesController : ControllerBase
         int page = 1,
         int pageSize = 20)
     {
-        var query = _context.Employees.AsQueryable();
+        var query = _context.Employees
+            .AsQueryable();
 
         if (!string.IsNullOrEmpty(lastName))
             query = query.Where(e => e.LastName.Contains(lastName));
@@ -59,7 +61,8 @@ public class EmployeesController : ControllerBase
             LastName = dto.LastName,
             Phone = dto.Phone,
             Email = dto.Email,
-            Role = dto.Role
+            CompanyId = dto.CompanyId,
+            Role = OrgStructureApi.Models.EmployeeRole.RegularEmployee
         };
 
         _context.Employees.Add(employee);
@@ -76,12 +79,18 @@ public class EmployeesController : ControllerBase
         if (employee == null)
             return NotFound();
 
+        if (employee.CompanyId != dto.CompanyId)
+        {
+            if (await EmployeeValidationHelper.IsEmployeeLeaderOrDirector(_context, id))
+                return BadRequest("Cannot change company for an employee who is a leader or director.");
+        }
+
         employee.Title = dto.Title;
         employee.FirstName = dto.FirstName;
         employee.LastName = dto.LastName;
         employee.Phone = dto.Phone;
         employee.Email = dto.Email;
-        employee.Role = dto.Role;
+        employee.CompanyId = dto.CompanyId;
 
         await _context.SaveChangesAsync();
         return NoContent();
@@ -93,6 +102,12 @@ public class EmployeesController : ControllerBase
     {
         var employee = await _context.Employees.FindAsync(id);
         if (employee == null) return NotFound();
+
+        if (updatedFields.CompanyId.HasValue && employee.CompanyId != updatedFields.CompanyId.Value)
+        {
+            if (await EmployeeValidationHelper.IsEmployeeLeaderOrDirector(_context, id))
+                return BadRequest("Cannot change company for an employee who is a leader or director.");
+        }
 
         if (!string.IsNullOrEmpty(updatedFields.Title))
             employee.Title = updatedFields.Title;
@@ -109,8 +124,9 @@ public class EmployeesController : ControllerBase
         if (!string.IsNullOrEmpty(updatedFields.Email))
             employee.Email = updatedFields.Email;
 
-        if (updatedFields.Role.HasValue)
-            employee.Role = updatedFields.Role.Value;
+        if (updatedFields.CompanyId.HasValue)
+            employee.CompanyId = updatedFields.CompanyId.Value;
+
 
         await _context.SaveChangesAsync();
         return NoContent();
@@ -125,6 +141,12 @@ public class EmployeesController : ControllerBase
         if (employee == null)
         {
             return NotFound();
+        }
+
+        var company = await _context.Companies.FirstOrDefaultAsync(c => c.DirectorId == id);
+        if (company != null)
+        {
+            company.DirectorId = null;
         }
 
         _context.Employees.Remove(employee);

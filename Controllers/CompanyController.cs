@@ -18,25 +18,43 @@ public class CompanyController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Company>>> GetCompanies()
+    public async Task<ActionResult<IEnumerable<CompanyReadDto>>> GetCompanies()
     {
         var companies = await _context.Companies
-            .Include(c => c.Divisions)
-            .Include(c => c.Employees)
+            .Select(c => new CompanyReadDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Code = c.Code,
+                DirectorId = c.DirectorId,
+                DivisionsCount = c.Divisions != null ? c.Divisions.Count : 0,
+                EmployeesCount = c.Employees != null ? c.Employees.Count : 0
+            })
             .ToListAsync();
-        return companies;
+
+        return Ok(companies);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Company>> GetCompany(int id)
+    public async Task<ActionResult<CompanyReadDto>> GetCompany(int id)
     {
         var company = await _context.Companies
-            .Include(c => c.Divisions)
-            .Include(c => c.Employees)
-            .FirstOrDefaultAsync(c => c.Id == id);
+            .Where(c => c.Id == id)
+            .Select(c => new CompanyReadDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Code = c.Code,
+                DirectorId = c.DirectorId,
+                DivisionsCount = c.Divisions != null ? c.Divisions.Count : 0,
+                EmployeesCount = c.Employees != null ? c.Employees.Count : 0
+            })
+            .FirstOrDefaultAsync();
+
         if (company == null)
             return NotFound();
-        return company;
+
+        return Ok(company);
     }
 
     [HttpPost]
@@ -50,6 +68,24 @@ public class CompanyController : ControllerBase
         };
         _context.Companies.Add(company);
         await _context.SaveChangesAsync();
+
+        if (company.DirectorId.HasValue)
+        {
+            var director = await _context.Employees.FindAsync(company.DirectorId.Value);
+            if (director == null)
+                return BadRequest("Director not found.");
+            if (director.CompanyId != company.Id)
+            {
+                director.CompanyId = company.Id;
+            }
+            var otherCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Id != company.Id && c.DirectorId == director.Id);
+            if (otherCompany != null)
+            {
+                otherCompany.DirectorId = null;
+            }
+            director.Role = EmployeeRole.Director;
+            await _context.SaveChangesAsync();
+        }
         return CreatedAtAction(nameof(GetCompany), new { id = company.Id }, company);
     }
 
@@ -59,10 +95,41 @@ public class CompanyController : ControllerBase
         var company = await _context.Companies.FindAsync(id);
         if (company == null)
             return NotFound();
+
+        if (company.DirectorId.HasValue && company.DirectorId != dto.DirectorId)
+        {
+            var oldDirector = await _context.Employees.FindAsync(company.DirectorId.Value);
+            if (oldDirector != null)
+            {
+                oldDirector.Role = EmployeeRole.RegularEmployee;
+                var otherCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Id != company.Id && c.DirectorId == oldDirector.Id);
+                if (otherCompany != null)
+                {
+                    otherCompany.DirectorId = null;
+                }
+            }
+        }
+
         company.Name = dto.Name;
         company.Code = dto.Code;
         company.DirectorId = dto.DirectorId;
         await _context.SaveChangesAsync();
+
+        if (company.DirectorId.HasValue)
+        {
+            var director = await _context.Employees.FindAsync(company.DirectorId.Value);
+            if (director == null)
+                return BadRequest("Director not found.");
+            if (director.CompanyId != company.Id)
+                return BadRequest("Director must be an employee of this company.");
+            var otherCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Id != company.Id && c.DirectorId == director.Id);
+            if (otherCompany != null)
+            {
+                otherCompany.DirectorId = null;
+            }
+            director.Role = EmployeeRole.Director;
+            await _context.SaveChangesAsync();
+        }
         return NoContent();
     }
 
@@ -72,6 +139,21 @@ public class CompanyController : ControllerBase
         var company = await _context.Companies.FindAsync(id);
         if (company == null)
             return NotFound();
+
+        if (dto.DirectorId.HasValue && company.DirectorId.HasValue && company.DirectorId != dto.DirectorId)
+        {
+            var oldDirector = await _context.Employees.FindAsync(company.DirectorId.Value);
+            if (oldDirector != null)
+            {
+                oldDirector.Role = EmployeeRole.RegularEmployee;
+                var otherCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Id != company.Id && c.DirectorId == oldDirector.Id);
+                if (otherCompany != null)
+                {
+                    otherCompany.DirectorId = null;
+                }
+            }
+        }
+
         if (dto.Name != null)
             company.Name = dto.Name;
         if (dto.Code != null)
@@ -79,6 +161,22 @@ public class CompanyController : ControllerBase
         if (dto.DirectorId.HasValue)
             company.DirectorId = dto.DirectorId;
         await _context.SaveChangesAsync();
+
+        if (company.DirectorId.HasValue)
+        {
+            var director = await _context.Employees.FindAsync(company.DirectorId.Value);
+            if (director == null)
+                return BadRequest("Director not found.");
+            if (director.CompanyId != company.Id)
+                return BadRequest("Director must be an employee of this company.");
+            var otherCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Id != company.Id && c.DirectorId == director.Id);
+            if (otherCompany != null)
+            {
+                otherCompany.DirectorId = null;
+            }
+            director.Role = EmployeeRole.Director;
+            await _context.SaveChangesAsync();
+        }
         return NoContent();
     }
 
@@ -88,6 +186,16 @@ public class CompanyController : ControllerBase
         var company = await _context.Companies.FindAsync(id);
         if (company == null)
             return NotFound();
+
+        if (company.DirectorId.HasValue)
+        {
+            var director = await _context.Employees.FindAsync(company.DirectorId.Value);
+            if (director != null)
+            {
+                director.Role = EmployeeRole.RegularEmployee;
+            }
+        }
+
         _context.Companies.Remove(company);
         await _context.SaveChangesAsync();
         return NoContent();
