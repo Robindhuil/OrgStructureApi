@@ -34,6 +34,7 @@ public class EmployeesController : ControllerBase
             query = query.Where(e => e.Role == role.Value);
 
         return await query
+            .OrderBy(e => e.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -147,6 +148,24 @@ public class EmployeesController : ControllerBase
         if (company != null)
         {
             company.DirectorId = null;
+        }
+
+        var division = await _context.Divisions.FirstOrDefaultAsync(d => d.LeaderId == id);
+        if (division != null)
+        {
+            division.LeaderId = null;
+        }
+
+        var project = await _context.Projects.FirstOrDefaultAsync(p => p.LeaderId == id);
+        if (project != null)
+        {
+            project.LeaderId = null;
+        }
+
+        var department = await _context.Departments.FirstOrDefaultAsync(dep => dep.LeaderId == id);
+        if (department != null)
+        {
+            department.LeaderId = null;
         }
 
         _context.Employees.Remove(employee);

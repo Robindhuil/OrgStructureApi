@@ -83,6 +83,24 @@ public class CompanyController : ControllerBase
             {
                 otherCompany.DirectorId = null;
             }
+            // Check if director is leading a division
+            var division = await _context.Divisions.FirstOrDefaultAsync(d => d.LeaderId == director.Id);
+            if (division != null)
+            {
+                division.LeaderId = null;
+            }
+            // Check if leading a project
+            var project = await _context.Projects.FirstOrDefaultAsync(p => p.LeaderId == director.Id);
+            if (project != null)
+            {
+                project.LeaderId = null;
+            }
+            // Check if leading a department
+            var department = await _context.Departments.FirstOrDefaultAsync(dep => dep.LeaderId == director.Id);
+            if (department != null)
+            {
+                department.LeaderId = null;
+            }
             director.Role = EmployeeRole.Director;
             await _context.SaveChangesAsync();
         }
