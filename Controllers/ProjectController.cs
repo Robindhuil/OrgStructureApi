@@ -96,27 +96,35 @@ public class ProjectController : ControllerBase
         if (project == null)
             return NotFound();
 
-        project.Name = dto.Name;
-        project.Code = dto.Code;
-        project.DivisionId = dto.DivisionId;
-        project.LeaderId = dto.LeaderId;
-        await _context.SaveChangesAsync();
+        // determine resulting values without persisting
+        var targetDivisionId = dto.DivisionId;
+        var resultingLeaderId = dto.LeaderId;
 
-        if (project.LeaderId.HasValue)
+        if (targetDivisionId == 0)
+            targetDivisionId = project.DivisionId;
+
+        if (!dto.LeaderId.HasValue)
+            resultingLeaderId = project.LeaderId;
+
+        if (resultingLeaderId.HasValue)
         {
-            var leader = await _context.Employees.FindAsync(project.LeaderId.Value);
+            var leader = await _context.Employees.FindAsync(resultingLeaderId.Value);
             if (leader == null)
                 return BadRequest("Leader not found.");
 
-            var division = await _context.Divisions.FindAsync(project.DivisionId);
+            var division = await _context.Divisions.FindAsync(targetDivisionId);
             if (division == null)
                 return BadRequest("Division not found.");
 
             if (leader.CompanyId != division.CompanyId)
                 return BadRequest("Leader must be an employee of the company.");
-
-            await _context.SaveChangesAsync();
         }
+
+        project.Name = dto.Name;
+        project.Code = dto.Code;
+        project.DivisionId = dto.DivisionId;
+        project.LeaderId = dto.LeaderId;
+        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -128,6 +136,24 @@ public class ProjectController : ControllerBase
         if (project == null)
             return NotFound();
 
+        // determine resulting values without persisting
+        var targetDivisionId = dto.DivisionId.HasValue ? dto.DivisionId.Value : project.DivisionId;
+        var resultingLeaderId = dto.LeaderId.HasValue ? dto.LeaderId : project.LeaderId;
+
+        if (resultingLeaderId.HasValue)
+        {
+            var leader = await _context.Employees.FindAsync(resultingLeaderId.Value);
+            if (leader == null)
+                return BadRequest("Leader not found.");
+
+            var division = await _context.Divisions.FindAsync(targetDivisionId);
+            if (division == null)
+                return BadRequest("Division not found.");
+
+            if (leader.CompanyId != division.CompanyId)
+                return BadRequest("Leader must be an employee of the company.");
+        }
+
         if (dto.Name != null)
             project.Name = dto.Name;
         if (dto.Code != null)
@@ -138,22 +164,6 @@ public class ProjectController : ControllerBase
             project.LeaderId = dto.LeaderId;
 
         await _context.SaveChangesAsync();
-
-        if (project.LeaderId.HasValue)
-        {
-            var leader = await _context.Employees.FindAsync(project.LeaderId.Value);
-            if (leader == null)
-                return BadRequest("Leader not found.");
-
-            var division = await _context.Divisions.FindAsync(project.DivisionId);
-            if (division == null)
-                return BadRequest("Division not found.");
-
-            if (leader.CompanyId != division.CompanyId)
-                return BadRequest("Leader must be an employee of the company.");
-
-            await _context.SaveChangesAsync();
-        }
 
         return NoContent();
     }
