@@ -83,25 +83,6 @@ public class CompanyController : ControllerBase
             {
                 otherCompany.DirectorId = null;
             }
-            // Check if director is leading a division
-            var division = await _context.Divisions.FirstOrDefaultAsync(d => d.LeaderId == director.Id);
-            if (division != null)
-            {
-                division.LeaderId = null;
-            }
-            // Check if leading a project
-            var project = await _context.Projects.FirstOrDefaultAsync(p => p.LeaderId == director.Id);
-            if (project != null)
-            {
-                project.LeaderId = null;
-            }
-            // Check if leading a department
-            var department = await _context.Departments.FirstOrDefaultAsync(dep => dep.LeaderId == director.Id);
-            if (department != null)
-            {
-                department.LeaderId = null;
-            }
-            director.Role = EmployeeRole.Director;
             await _context.SaveChangesAsync();
         }
         return CreatedAtAction(nameof(GetCompany), new { id = company.Id }, company);
@@ -119,7 +100,6 @@ public class CompanyController : ControllerBase
             var oldDirector = await _context.Employees.FindAsync(company.DirectorId.Value);
             if (oldDirector != null)
             {
-                oldDirector.Role = EmployeeRole.RegularEmployee;
                 var otherCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Id != company.Id && c.DirectorId == oldDirector.Id);
                 if (otherCompany != null)
                 {
@@ -145,7 +125,6 @@ public class CompanyController : ControllerBase
             {
                 otherCompany.DirectorId = null;
             }
-            director.Role = EmployeeRole.Director;
             await _context.SaveChangesAsync();
         }
         return NoContent();
@@ -163,7 +142,6 @@ public class CompanyController : ControllerBase
             var oldDirector = await _context.Employees.FindAsync(company.DirectorId.Value);
             if (oldDirector != null)
             {
-                oldDirector.Role = EmployeeRole.RegularEmployee;
                 var otherCompany = await _context.Companies.FirstOrDefaultAsync(c => c.Id != company.Id && c.DirectorId == oldDirector.Id);
                 if (otherCompany != null)
                 {
@@ -192,7 +170,6 @@ public class CompanyController : ControllerBase
             {
                 otherCompany.DirectorId = null;
             }
-            director.Role = EmployeeRole.Director;
             await _context.SaveChangesAsync();
         }
         return NoContent();
@@ -210,7 +187,6 @@ public class CompanyController : ControllerBase
             var director = await _context.Employees.FindAsync(company.DirectorId.Value);
             if (director != null)
             {
-                director.Role = EmployeeRole.RegularEmployee;
             }
         }
 

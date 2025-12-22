@@ -79,31 +79,6 @@ public class DivisionController : ControllerBase
             {
                 leader.CompanyId = division.CompanyId;
             }
-            // Check if leader is already leading another division
-            var otherDivision = await _context.Divisions.FirstOrDefaultAsync(d => d.Id != division.Id && d.LeaderId == leader.Id);
-            if (otherDivision != null)
-            {
-                otherDivision.LeaderId = null;
-            }
-            // Check if leader is director of a company
-            var company = await _context.Companies.FirstOrDefaultAsync(c => c.DirectorId == leader.Id);
-            if (company != null)
-            {
-                company.DirectorId = null;
-            }
-            // Check if leader is leading a project
-            var project = await _context.Projects.FirstOrDefaultAsync(p => p.LeaderId == leader.Id);
-            if (project != null)
-            {
-                project.LeaderId = null;
-            }
-            // Check if leader is leading a department
-            var department = await _context.Departments.FirstOrDefaultAsync(dep => dep.LeaderId == leader.Id);
-            if (department != null)
-            {
-                department.LeaderId = null;
-            }
-            leader.Role = EmployeeRole.DivisionLeader;
             await _context.SaveChangesAsync();
         }
         return CreatedAtAction(nameof(GetDivision), new { id = division.Id }, division);
@@ -121,7 +96,6 @@ public class DivisionController : ControllerBase
             var oldLeader = await _context.Employees.FindAsync(division.LeaderId.Value);
             if (oldLeader != null)
             {
-                oldLeader.Role = EmployeeRole.RegularEmployee;
             }
         }
 
@@ -138,31 +112,6 @@ public class DivisionController : ControllerBase
                 return BadRequest("Leader not found.");
             if (leader.CompanyId != division.CompanyId)
                 return BadRequest("Leader must be an employee of the company.");
-            // Check if leader is already leading another division
-            var otherDivision = await _context.Divisions.FirstOrDefaultAsync(d => d.Id != division.Id && d.LeaderId == leader.Id);
-            if (otherDivision != null)
-            {
-                otherDivision.LeaderId = null;
-            }
-            // Check if leader is director of a company
-            var company = await _context.Companies.FirstOrDefaultAsync(c => c.DirectorId == leader.Id);
-            if (company != null)
-            {
-                company.DirectorId = null;
-            }
-            // Check if leader is leading a project
-            var project = await _context.Projects.FirstOrDefaultAsync(p => p.LeaderId == leader.Id);
-            if (project != null)
-            {
-                project.LeaderId = null;
-            }
-            // Check if leader is leading a department
-            var department = await _context.Departments.FirstOrDefaultAsync(dep => dep.LeaderId == leader.Id);
-            if (department != null)
-            {
-                department.LeaderId = null;
-            }
-            leader.Role = EmployeeRole.DivisionLeader;
             await _context.SaveChangesAsync();
         }
         return NoContent();
@@ -180,7 +129,6 @@ public class DivisionController : ControllerBase
             var oldLeader = await _context.Employees.FindAsync(division.LeaderId.Value);
             if (oldLeader != null)
             {
-                oldLeader.Role = EmployeeRole.RegularEmployee;
             }
         }
 
@@ -201,31 +149,6 @@ public class DivisionController : ControllerBase
                 return BadRequest("Leader not found.");
             if (leader.CompanyId != division.CompanyId)
                 return BadRequest("Leader must be an employee of the company.");
-            // Check if leader is already leading another division
-            var otherDivision = await _context.Divisions.FirstOrDefaultAsync(d => d.Id != division.Id && d.LeaderId == leader.Id);
-            if (otherDivision != null)
-            {
-                otherDivision.LeaderId = null;
-            }
-            // Check if leader is director of a company
-            var company = await _context.Companies.FirstOrDefaultAsync(c => c.DirectorId == leader.Id);
-            if (company != null)
-            {
-                company.DirectorId = null;
-            }
-            // Check if leader is leading a project
-            var project = await _context.Projects.FirstOrDefaultAsync(p => p.LeaderId == leader.Id);
-            if (project != null)
-            {
-                project.LeaderId = null;
-            }
-            // Check if leader is leading a department
-            var department = await _context.Departments.FirstOrDefaultAsync(dep => dep.LeaderId == leader.Id);
-            if (department != null)
-            {
-                department.LeaderId = null;
-            }
-            leader.Role = EmployeeRole.DivisionLeader;
             await _context.SaveChangesAsync();
         }
         return NoContent();
@@ -243,7 +166,6 @@ public class DivisionController : ControllerBase
             var leader = await _context.Employees.FindAsync(division.LeaderId.Value);
             if (leader != null)
             {
-                leader.Role = EmployeeRole.RegularEmployee;
             }
         }
 

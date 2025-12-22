@@ -21,5 +21,4 @@ public class EmployeeCreateDto
 
     [Required]
     public int CompanyId { get; set; }
-    public OrgStructureApi.Models.EmployeeRole Role { get; set; } = OrgStructureApi.Models.EmployeeRole.RegularEmployee;
 }

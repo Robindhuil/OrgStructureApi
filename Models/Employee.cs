@@ -11,9 +11,6 @@ public class Employee
     [Required, StringLength(20)]
     public string Title { get; set; } = null!;
 
-    [Required]
-    public EmployeeRole Role { get; set; } = EmployeeRole.RegularEmployee;
-
     [Required, StringLength(50)]
     public string FirstName { get; set; } = null!;
 

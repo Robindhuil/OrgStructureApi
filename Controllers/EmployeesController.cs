@@ -18,10 +18,32 @@ public class EmployeesController : ControllerBase
         _context = context;
     }
 
+    private async Task<bool> IsLeaderOrDirectorInCompany(int employeeId, int? companyId)
+    {
+        if (!companyId.HasValue) return false;
+        var cid = companyId.Value;
+
+        var isDirector = await _context.Companies.AnyAsync(c => c.DirectorId == employeeId && c.Id == cid);
+        if (isDirector) return true;
+
+        var isDivisionLeader = await _context.Divisions.AnyAsync(d => d.LeaderId == employeeId && d.CompanyId == cid);
+        if (isDivisionLeader) return true;
+
+        var isProjectLeader = await _context.Projects
+            .Include(p => p.Division)
+            .AnyAsync(p => p.LeaderId == employeeId && p.Division != null && p.Division.CompanyId == cid);
+        if (isProjectLeader) return true;
+
+        var isDepartmentLeader = await _context.Departments
+            .Include(d => d.Project)
+            .ThenInclude(p => p.Division)
+            .AnyAsync(d => d.LeaderId == employeeId && d.Project != null && d.Project.Division != null && d.Project.Division.CompanyId == cid);
+        return isDepartmentLeader;
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees(
         string? lastName,
-        OrgStructureApi.Models.EmployeeRole? role = null,
         int page = 1,
         int pageSize = 20)
     {
@@ -30,8 +52,6 @@ public class EmployeesController : ControllerBase
 
         if (!string.IsNullOrEmpty(lastName))
             query = query.Where(e => e.LastName.Contains(lastName));
-        if (role.HasValue)
-            query = query.Where(e => e.Role == role.Value);
 
         return await query
             .OrderBy(e => e.Id)
@@ -62,8 +82,7 @@ public class EmployeesController : ControllerBase
             LastName = dto.LastName,
             Phone = dto.Phone,
             Email = dto.Email,
-            CompanyId = dto.CompanyId,
-            Role = OrgStructureApi.Models.EmployeeRole.RegularEmployee
+            CompanyId = dto.CompanyId
         };
 
         _context.Employees.Add(employee);
@@ -80,9 +99,9 @@ public class EmployeesController : ControllerBase
         if (employee == null)
             return NotFound();
 
-        if (employee.CompanyId != dto.CompanyId)
+        if (employee.CompanyId.HasValue && employee.CompanyId != dto.CompanyId)
         {
-            if (await EmployeeValidationHelper.IsEmployeeLeaderOrDirector(_context, id))
+            if (await IsLeaderOrDirectorInCompany(id, employee.CompanyId))
                 return BadRequest("Cannot change company for an employee who is a leader or director.");
         }
 
@@ -104,9 +123,9 @@ public class EmployeesController : ControllerBase
         var employee = await _context.Employees.FindAsync(id);
         if (employee == null) return NotFound();
 
-        if (updatedFields.CompanyId.HasValue && employee.CompanyId != updatedFields.CompanyId.Value)
+        if (updatedFields.CompanyId.HasValue && employee.CompanyId.HasValue && employee.CompanyId != updatedFields.CompanyId.Value)
         {
-            if (await EmployeeValidationHelper.IsEmployeeLeaderOrDirector(_context, id))
+            if (await IsLeaderOrDirectorInCompany(id, employee.CompanyId))
                 return BadRequest("Cannot change company for an employee who is a leader or director.");
         }
 

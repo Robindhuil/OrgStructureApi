@@ -15,5 +15,4 @@ public class EmployeePatchDto
     public string? Email { get; set; }
 
     public int? CompanyId { get; set; }
-    public OrgStructureApi.Models.EmployeeRole? Role { get; set; } = OrgStructureApi.Models.EmployeeRole.RegularEmployee;
 }

@@ -8,12 +8,12 @@ namespace OrgStructureApi.Helpers
 
     public static class EmployeeValidationHelper
     {
-        public static async Task<bool> IsEmployeeLeaderOrDirector(AppDbContext context, int employeeId)
+        public static async Task<bool> IsEmployeeLeaderOrDirector(AppDbContext context, int employeeId, int companyId)
         {
-            return await context.Companies.AnyAsync(c => c.DirectorId == employeeId)
-                || await context.Divisions.AnyAsync(d => d.LeaderId == employeeId)
-                || await context.Projects.AnyAsync(p => p.LeaderId == employeeId)
-                || await context.Departments.AnyAsync(d => d.LeaderId == employeeId);
+            return await context.Companies.AnyAsync(c => c.DirectorId == employeeId && c.Id == companyId)
+                || await context.Divisions.AnyAsync(d => d.LeaderId == employeeId && d.CompanyId == companyId)
+                || await context.Projects.AnyAsync(p => p.LeaderId == employeeId && p.Division.CompanyId == companyId)
+                || await context.Departments.AnyAsync(d => d.LeaderId == employeeId && d.Project.Division.CompanyId == companyId);
         }
 
         public static async Task<bool> IsEmployeeInCompany(AppDbContext context, int employeeId, int companyId)
