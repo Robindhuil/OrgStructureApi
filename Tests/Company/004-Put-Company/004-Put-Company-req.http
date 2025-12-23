@@ -1,0 +1,32 @@
+###
+# @name PutCompanyOk
+PUT http://localhost:5086/api/company/1
+Content-Type: application/json
+
+{
+  "name": "Put Updated Company",
+  "code": "PUT-COMP-1",
+  "directorId": null
+}
+
+###
+# @name PutCompanyDirectorNotFound
+PUT http://localhost:5086/api/company/1
+Content-Type: application/json
+
+{
+  "name": "Put Company With Missing Director",
+  "code": "PUT-MISSING-DIR",
+  "directorId": 999999
+}
+
+###
+# @name PutCompanyConflictCode
+PUT http://localhost:5086/api/company/1
+Content-Type: application/json
+
+{
+  "name": "Put Company Conflict",
+  "code": "TEST-COMP-UNQ",
+  "directorId": null
+}

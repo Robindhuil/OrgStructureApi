@@ -1,0 +1,25 @@
+###
+# @name PatchCompanyOk
+PATCH http://localhost:5086/api/company/1
+Content-Type: application/json
+
+{
+  "name": "Patched Company Name"
+}
+
+###
+# @name PatchCompanyDirectorNotFound
+PATCH http://localhost:5086/api/company/1
+Content-Type: application/json
+
+{
+  "directorId": 999999
+}
+
+###
+# @name PatchCompanyNoOp
+PATCH http://localhost:5086/api/company/1
+Content-Type: application/json
+
+{
+}
