@@ -1,0 +1,15 @@
+###
+# @name DeleteEmployee1
+DELETE http://localhost:5086/api/employees/1
+
+###
+# @name GetEmployee1AfterDelete
+GET http://localhost:5086/api/employees/1
+
+###
+# @name DeleteEmployee1Again
+DELETE http://localhost:5086/api/employees/1
+
+###
+# @name DeleteEmployeeNonExist
+DELETE http://localhost:5086/api/employees/999999
