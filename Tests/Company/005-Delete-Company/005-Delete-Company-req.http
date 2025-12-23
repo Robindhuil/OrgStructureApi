@@ -1,0 +1,11 @@
+###
+# @name DeleteCompanyOk
+DELETE http://localhost:5086/api/company/1
+
+###
+# @name DeleteCompanyNotFound
+DELETE http://localhost:5086/api/company/999999
+
+###
+# @name DeleteCompanyAgain
+DELETE http://localhost:5086/api/company/1
