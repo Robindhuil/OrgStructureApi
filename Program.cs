@@ -5,11 +5,21 @@ using OrgStructureApi.Extensions;
 using OrgStructureApi.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
+using Scalar.AspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "OrgStructure API",
+        Version = "v1"
+    });
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -46,8 +56,18 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+
+    app.MapScalarApiReference(options =>
+    {
+        options
+            .WithTitle("OrgStructure API")
+            .WithTheme(ScalarTheme.Solarized)
+            .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    });
+
 }
+
 
 app.UseApiExceptionHandler();
 app.UseHttpsRedirection();
