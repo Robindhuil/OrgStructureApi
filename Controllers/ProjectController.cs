@@ -60,6 +60,13 @@ public class ProjectController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Project>> CreateProject(ProjectCreateDto dto)
     {
+        var division = await _context.Divisions.FindAsync(dto.DivisionId);
+        if (division == null)
+            return BadRequest(new OrgStructureApi.Dtos.ApiErrorResponse(400, "Validation Error", "Division not found."));
+
+        if (await _context.Projects.AnyAsync(p => p.DivisionId == dto.DivisionId && p.Code == dto.Code))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Project code already in use for this division."));
+
         var project = new Project
         {
             Name = dto.Name,
@@ -76,7 +83,6 @@ public class ProjectController : ControllerBase
             if (leader == null)
                 return BadRequest("Leader not found.");
 
-            var division = await _context.Divisions.FindAsync(project.DivisionId);
             if (division == null)
                 return BadRequest("Division not found.");
 
@@ -96,15 +102,16 @@ public class ProjectController : ControllerBase
         if (project == null)
             return NotFound();
 
-        // determine resulting values without persisting
         var targetDivisionId = dto.DivisionId;
-        var resultingLeaderId = dto.LeaderId;
-
         if (targetDivisionId == 0)
             targetDivisionId = project.DivisionId;
 
+        var resultingLeaderId = dto.LeaderId;
         if (!dto.LeaderId.HasValue)
             resultingLeaderId = project.LeaderId;
+
+        if (await _context.Projects.AnyAsync(p => p.Id != id && p.DivisionId == targetDivisionId && p.Code == dto.Code))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Project code already in use for this division."));
 
         if (resultingLeaderId.HasValue)
         {
@@ -136,8 +143,11 @@ public class ProjectController : ControllerBase
         if (project == null)
             return NotFound();
 
-        // determine resulting values without persisting
         var targetDivisionId = dto.DivisionId.HasValue ? dto.DivisionId.Value : project.DivisionId;
+        var targetCode = dto.Code ?? project.Code;
+        if (await _context.Projects.AnyAsync(p => p.Id != id && p.DivisionId == targetDivisionId && p.Code == targetCode))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Project code already in use for this division."));
+
         var resultingLeaderId = dto.LeaderId.HasValue ? dto.LeaderId : project.LeaderId;
 
         if (resultingLeaderId.HasValue)
@@ -180,7 +190,6 @@ public class ProjectController : ControllerBase
             var leader = await _context.Employees.FindAsync(project.LeaderId.Value);
             if (leader != null)
             {
-                // leave leader reference intact; business rule allows same employee to hold multiple roles
             }
         }
 

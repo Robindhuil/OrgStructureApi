@@ -75,6 +75,15 @@ public class EmployeesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Employee>> CreateEmployee(EmployeeCreateDto dto)
     {
+        var companyExists = await _context.Companies.AnyAsync(c => c.Id == dto.CompanyId);
+        if (!companyExists)
+            return BadRequest(new OrgStructureApi.Dtos.ApiErrorResponse(400, "Validation Error", "Company not found."));
+
+        if (await _context.Employees.AnyAsync(e => e.Email == dto.Email))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Email already in use by another employee."));
+        if (await _context.Employees.AnyAsync(e => e.Phone == dto.Phone))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Phone already in use by another employee."));
+
         var employee = new Employee
         {
             Title = dto.Title,
@@ -108,6 +117,11 @@ public class EmployeesController : ControllerBase
         employee.Title = dto.Title;
         employee.FirstName = dto.FirstName;
         employee.LastName = dto.LastName;
+        if (await _context.Employees.AnyAsync(e => e.Id != id && e.Email == dto.Email))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Email already in use by another employee."));
+        if (await _context.Employees.AnyAsync(e => e.Id != id && e.Phone == dto.Phone))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Phone already in use by another employee."));
+
         employee.Phone = dto.Phone;
         employee.Email = dto.Email;
         employee.CompanyId = dto.CompanyId;
@@ -139,10 +153,18 @@ public class EmployeesController : ControllerBase
             employee.LastName = updatedFields.LastName;
 
         if (!string.IsNullOrEmpty(updatedFields.Phone))
+        {
+            if (await _context.Employees.AnyAsync(e => e.Id != id && e.Phone == updatedFields.Phone))
+                return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Phone already in use by another employee."));
             employee.Phone = updatedFields.Phone;
+        }
 
         if (!string.IsNullOrEmpty(updatedFields.Email))
+        {
+            if (await _context.Employees.AnyAsync(e => e.Id != id && e.Email == updatedFields.Email))
+                return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Email already in use by another employee."));
             employee.Email = updatedFields.Email;
+        }
 
         if (updatedFields.CompanyId.HasValue)
             employee.CompanyId = updatedFields.CompanyId.Value;

@@ -60,6 +60,10 @@ public class CompanyController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Company>> CreateCompany(CompanyCreateDto dto)
     {
+        if (await _context.Companies.AnyAsync(c => c.Code == dto.Code))
+        {
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Company code already in use."));
+        }
         var company = new Company
         {
             Name = dto.Name,
@@ -94,6 +98,9 @@ public class CompanyController : ControllerBase
         var company = await _context.Companies.FindAsync(id);
         if (company == null)
             return NotFound();
+
+        if (await _context.Companies.AnyAsync(c => c.Id != id && c.Code == dto.Code))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Company code already in use."));
 
         if (company.DirectorId.HasValue && company.DirectorId != dto.DirectorId)
         {
@@ -182,12 +189,10 @@ public class CompanyController : ControllerBase
         if (company == null)
             return NotFound();
 
-        if (company.DirectorId.HasValue)
+        var hasEmployees = await _context.Employees.AnyAsync(e => e.CompanyId == company.Id);
+        if (hasEmployees)
         {
-            var director = await _context.Employees.FindAsync(company.DirectorId.Value);
-            if (director != null)
-            {
-            }
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Company cannot be deleted while employees are assigned. Reassign or delete employees first."));
         }
 
         _context.Companies.Remove(company);

@@ -58,6 +58,13 @@ public class DepartmentController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Department>> CreateDepartment(DepartmentCreateDto dto)
     {
+        var project = await _context.Projects.FindAsync(dto.ProjectId);
+        if (project == null)
+            return BadRequest(new OrgStructureApi.Dtos.ApiErrorResponse(400, "Validation Error", "Project not found."));
+
+        if (await _context.Departments.AnyAsync(d => d.ProjectId == dto.ProjectId && d.Code == dto.Code))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Department code already in use for this project."));
+
         var department = new Department
         {
             Name = dto.Name,
@@ -74,7 +81,6 @@ public class DepartmentController : ControllerBase
             if (leader == null)
                 return BadRequest("Leader not found.");
 
-            var project = await _context.Projects.FindAsync(department.ProjectId);
             if (project == null)
                 return BadRequest("Project not found.");
 
@@ -98,19 +104,15 @@ public class DepartmentController : ControllerBase
         if (department == null)
             return NotFound();
 
-        // Determine resulting values without persisting yet
         var targetProjectId = dto.ProjectId;
         var resultingLeaderId = dto.LeaderId;
 
-        // If ProjectId Not provided in DTO, use existing
         if (targetProjectId == 0)
             targetProjectId = department.ProjectId;
 
-        // If LeaderId not provided in DTO, use existing
         if (!dto.LeaderId.HasValue)
             resultingLeaderId = department.LeaderId;
 
-        // If a leader will be set, ensure leader exists
         if (resultingLeaderId.HasValue)
         {
             var leader = await _context.Employees.FindAsync(resultingLeaderId.Value);
@@ -129,7 +131,9 @@ public class DepartmentController : ControllerBase
                 return BadRequest("Leader must be an employee of the company.");
         }
 
-        // All checks passed — apply changes and persist
+        if (await _context.Departments.AnyAsync(d => d.Id != id && d.ProjectId == targetProjectId && d.Code == dto.Code))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Department code already in use for this project."));
+
         department.Name = dto.Name;
         department.Code = dto.Code;
         department.ProjectId = dto.ProjectId;
@@ -146,8 +150,11 @@ public class DepartmentController : ControllerBase
         if (department == null)
             return NotFound();
 
-        // Determine resulting values without persisting yet
         var targetProjectId = dto.ProjectId.HasValue ? dto.ProjectId.Value : department.ProjectId;
+        var targetCode = dto.Code ?? department.Code;
+        if (await _context.Departments.AnyAsync(d => d.Id != id && d.ProjectId == targetProjectId && d.Code == targetCode))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Department code already in use for this project."));
+
         var resultingLeaderId = dto.LeaderId.HasValue ? dto.LeaderId : department.LeaderId;
 
         if (resultingLeaderId.HasValue)
@@ -194,7 +201,6 @@ public class DepartmentController : ControllerBase
             var leader = await _context.Employees.FindAsync(department.LeaderId.Value);
             if (leader != null)
             {
-                // leave leader reference intact; business rule allows same employee to hold multiple roles
             }
         }
 

@@ -60,6 +60,36 @@ namespace OrgStructureApi.Data
                 .WithMany(e => e.DepartmentsLed)
                 .HasForeignKey(d => d.LeaderId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.Company)
+                .WithMany(c => c.Employees)
+                .HasForeignKey(e => e.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Employee>()
+                .HasIndex(e => e.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<Employee>()
+                .HasIndex(e => e.Phone)
+                .IsUnique();
+
+            modelBuilder.Entity<Company>()
+                .HasIndex(c => c.Code)
+                .IsUnique();
+
+            modelBuilder.Entity<Division>()
+                .HasIndex(d => new { d.CompanyId, d.Code })
+                .IsUnique();
+
+            modelBuilder.Entity<Project>()
+                .HasIndex(p => new { p.DivisionId, p.Code })
+                .IsUnique();
+
+            modelBuilder.Entity<Department>()
+                .HasIndex(d => new { d.ProjectId, d.Code })
+                .IsUnique();
         }
     }
 }

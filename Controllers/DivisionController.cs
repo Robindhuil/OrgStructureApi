@@ -60,6 +60,12 @@ public class DivisionController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Division>> CreateDivision(DivisionCreateDto dto)
     {
+        if (!await _context.Companies.AnyAsync(c => c.Id == dto.CompanyId))
+            return BadRequest(new OrgStructureApi.Dtos.ApiErrorResponse(400, "Validation Error", "Company not found."));
+
+        if (await _context.Divisions.AnyAsync(d => d.CompanyId == dto.CompanyId && d.Code == dto.Code))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Division code already in use for this company."));
+
         var division = new Division
         {
             Name = dto.Name,
@@ -91,7 +97,9 @@ public class DivisionController : ControllerBase
         if (division == null)
             return NotFound();
 
-        // Compute resulting values without persisting yet
+        if (await _context.Divisions.AnyAsync(d => d.Id != id && d.CompanyId == dto.CompanyId && d.Code == dto.Code))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Division code already in use for this company."));
+
         var resultingCompanyId = dto.CompanyId;
         var resultingLeaderId = dto.LeaderId;
 
@@ -125,7 +133,11 @@ public class DivisionController : ControllerBase
         if (division == null)
             return NotFound();
 
-        // Compute resulting values without persisting yet
+        var targetCompanyId = dto.CompanyId.HasValue ? dto.CompanyId.Value : division.CompanyId;
+        var targetCode = dto.Code ?? division.Code;
+        if (await _context.Divisions.AnyAsync(d => d.Id != id && d.CompanyId == targetCompanyId && d.Code == targetCode))
+            return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Division code already in use for this company."));
+
         var resultingCompanyId = dto.CompanyId.HasValue ? dto.CompanyId.Value : division.CompanyId;
         var resultingLeaderId = dto.LeaderId.HasValue ? dto.LeaderId : division.LeaderId;
 

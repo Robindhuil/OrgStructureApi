@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using OrgStructureApi.Data;
+using System.Linq;
+using OrgStructureApi.Extensions;
+using OrgStructureApi.Dtos;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers()
@@ -13,6 +15,26 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(kvp => kvp.Value?.Errors?.Count > 0)
+            .ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).Where(s => !string.IsNullOrEmpty(s)).ToArray()
+            );
+
+        var problem = new ApiErrorResponse(StatusCodes.Status400BadRequest, "Validation Error")
+        {
+            Errors = errors
+        };
+
+        return new BadRequestObjectResult(problem);
+    };
+});
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         "Server=localhost,1433;Database=OrgDb;User Id=sa;Password=Heslo123!;TrustServerCertificate=True"
@@ -21,13 +43,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseApiExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
 
