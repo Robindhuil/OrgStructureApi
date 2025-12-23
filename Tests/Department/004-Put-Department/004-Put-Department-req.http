@@ -1,0 +1,47 @@
+###
+# @name PutDepartmentOk
+PUT http://localhost:5086/api/department/1
+Content-Type: application/json
+
+{
+  "name": "Put Updated Department",
+  "code": "PUT-DEPT-1",
+  "projectId": 1,
+  "leaderId": null
+}
+
+###
+# @name PutDepartmentDuplicateCode
+PUT http://localhost:5086/api/department/1
+Content-Type: application/json
+
+{
+  "name": "Put Department Conflict",
+  "code": "TEST-DEPT-UNQ",
+  "projectId": 1,
+  "leaderId": null
+}
+
+###
+# @name PutDepartmentLeaderNotFound
+PUT http://localhost:5086/api/department/1
+Content-Type: application/json
+
+{
+  "name": "Put Department Missing Leader",
+  "code": "PUT-MISSING-LEAD-DEPT",
+  "projectId": 1,
+  "leaderId": 999999
+}
+
+###
+# @name PutDepartmentNoOp
+PUT http://localhost:5086/api/department/1
+Content-Type: application/json
+
+{
+  "name": "Put Department NoOp",
+  "code": "PUT-DEPT-NOOP",
+  "projectId": 1,
+  "leaderId": null
+}

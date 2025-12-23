@@ -1,0 +1,47 @@
+###
+# @name PutProjectOk
+PUT http://localhost:5086/api/project/1
+Content-Type: application/json
+
+{
+  "name": "Put Updated Project",
+  "code": "PUT-PROJ-1",
+  "divisionId": 1,
+  "leaderId": null
+}
+
+###
+# @name PutProjectDuplicateCode
+PUT http://localhost:5086/api/project/1
+Content-Type: application/json
+
+{
+  "name": "Put Project Conflict",
+  "code": "TEST-PROJ-UNQ",
+  "divisionId": 1,
+  "leaderId": null
+}
+
+###
+# @name PutProjectLeaderNotFound
+PUT http://localhost:5086/api/project/1
+Content-Type: application/json
+
+{
+  "name": "Put Project Missing Leader",
+  "code": "PUT-MISSING-LEAD-PROJ",
+  "divisionId": 1,
+  "leaderId": 999999
+}
+
+###
+# @name PutProjectNoOp
+PUT http://localhost:5086/api/project/1
+Content-Type: application/json
+
+{
+  "name": "Put Project NoOp",
+  "code": "PUT-PROJ-NOOP",
+  "divisionId": 1,
+  "leaderId": null
+}

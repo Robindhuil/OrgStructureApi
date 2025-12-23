@@ -1,0 +1,35 @@
+###
+# @name PatchDepartmentOk
+PATCH http://localhost:5086/api/department/1
+Content-Type: application/json
+
+{
+  "name": "Patched Department Name"
+}
+
+###
+# @name PatchDepartmentDuplicateCode
+PATCH http://localhost:5086/api/department/1
+Content-Type: application/json
+
+{
+  "code": "DEPT-UNQ-1",
+  "projectId": 1
+}
+
+###
+# @name PatchDepartmentLeaderNotFound
+PATCH http://localhost:5086/api/department/1
+Content-Type: application/json
+
+{
+  "leaderId": 999999
+}
+
+###
+# @name PatchDepartmentNoOp
+PATCH http://localhost:5086/api/department/1
+Content-Type: application/json
+
+{
+}

@@ -1,0 +1,48 @@
+###
+# @name PutDivisionOk
+PUT http://localhost:5086/api/division/1
+Content-Type: application/json
+
+{
+	"name": "Put Updated Division",
+	"code": "PUT-DIV-1",
+	"companyId": 1,
+	"leaderId": null
+}
+
+###
+# @name PutDivisionDuplicateCode
+PUT http://localhost:5086/api/division/1
+Content-Type: application/json
+
+{
+	"name": "Put Division Conflict",
+	"code": "TEST-DIV-UNQ",
+	"companyId": 1,
+	"leaderId": null
+}
+
+###
+# @name PutDivisionLeaderNotFound
+PUT http://localhost:5086/api/division/1
+Content-Type: application/json
+
+{
+	"name": "Put Division Missing Leader",
+	"code": "PUT-MISSING-LEAD",
+	"companyId": 1,
+	"leaderId": 999999
+}
+
+###
+# @name PutDivisionNoOp
+PUT http://localhost:5086/api/division/1
+Content-Type: application/json
+
+{
+	"name": "Put Division NoOp",
+	"code": "PUT-NOOP",
+	"companyId": 1,
+	"leaderId": null
+}
+

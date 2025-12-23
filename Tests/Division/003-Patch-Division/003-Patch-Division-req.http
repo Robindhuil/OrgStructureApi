@@ -1,0 +1,35 @@
+###
+# @name PatchDivisionOk
+PATCH http://localhost:5086/api/division/1
+Content-Type: application/json
+
+{
+  "name": "Patched Division Name"
+}
+
+###
+# @name PatchDivisionDuplicateCode
+PATCH http://localhost:5086/api/division/1
+Content-Type: application/json
+
+{
+  "code": "DIV-UNQ-1",
+  "companyId": 1
+}
+
+###
+# @name PatchDivisionLeaderNotFound
+PATCH http://localhost:5086/api/division/1
+Content-Type: application/json
+
+{
+  "leaderId": 999999
+}
+
+###
+# @name PatchDivisionNoOp
+PATCH http://localhost:5086/api/division/1
+Content-Type: application/json
+
+{
+}

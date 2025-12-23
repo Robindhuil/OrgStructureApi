@@ -1,0 +1,35 @@
+###
+# @name PatchProjectOk
+PATCH http://localhost:5086/api/project/1
+Content-Type: application/json
+
+{
+  "name": "Patched Project Name"
+}
+
+###
+# @name PatchProjectDuplicateCode
+PATCH http://localhost:5086/api/project/1
+Content-Type: application/json
+
+{
+  "code": "PROJ-UNQ-1",
+  "divisionId": 1
+}
+
+###
+# @name PatchProjectLeaderNotFound
+PATCH http://localhost:5086/api/project/1
+Content-Type: application/json
+
+{
+  "leaderId": 999999
+}
+
+###
+# @name PatchProjectNoOp
+PATCH http://localhost:5086/api/project/1
+Content-Type: application/json
+
+{
+}
