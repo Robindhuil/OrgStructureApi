@@ -86,7 +86,16 @@ dotnet ef database update --project ./OrgStructureApi.csproj
 dotnet ef migrations script -o ./init.sql --project ./OrgStructureApi.csproj
 ```
 
-If you produced `init.sql`, you can run that script against SQL Server (for example using `sqlcmd` or SSMS).
+This repository includes an `init.sql` in the project root (generated from the EF Core migrations). You can use it to create the database schema without running `dotnet ef`.
+
+To run the script with `sqlcmd` (example):
+
+```bash
+# on the machine where SQL Server is reachable
+sqlcmd -S localhost,1433 -U sa -P "Your_strong!Passw0rd" -i ./init.sql
+```
+
+Or open `init.sql` in SQL Server Management Studio and execute it against the desired server/database.
 
 4. Run the API
 
