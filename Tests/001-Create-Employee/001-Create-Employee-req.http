@@ -1,0 +1,41 @@
+###
+# @name CreateEmployeeOk
+POST http://localhost:5086/api/employees
+Content-Type: application/json
+
+{
+  "title": "Ing.",
+  "firstName": "Jan",
+  "lastName": "Novak",
+  "phone": "0999000001",
+  "email": "unique.email@test.sk",
+  "companyId": 1
+}
+
+###
+# @name CreateEmployeeDuplicateEmail
+POST http://localhost:5086/api/employees
+Content-Type: application/json
+
+{
+  "title": "Mgr.",
+  "firstName": "Peter",
+  "lastName": "Mrkvicka",
+  "phone": "0999000002",
+  "email": "unique.email@test.sk",
+  "companyId": 1
+}
+
+###
+# @name CreateEmployeeDuplicatePhone
+POST http://localhost:5086/api/employees
+Content-Type: application/json
+
+{
+  "title": "Bc.",
+  "firstName": "Eva",
+  "lastName": "Hruskova",
+  "phone": "0999000001",
+  "email": "eva.hruskova@test.sk",
+  "companyId": 1
+}

@@ -3,12 +3,15 @@ using System.ComponentModel.DataAnnotations;
 public class EmployeeCreateDto
 {
     [Required]
+    [StringLength(20)]
     public string Title { get; set; } = null!;
 
     [Required]
+    [StringLength(50)]
     public string FirstName { get; set; } = null!;
 
     [Required]
+    [StringLength(50)]
     public string LastName { get; set; } = null!;
 
     [Required]

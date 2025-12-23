@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OrgStructureApi.Data;
 using OrgStructureApi.Models;
 using OrgStructureApi.Helpers;
+using OrgStructureApi.Dtos;
 
 namespace OrgStructureApi.Controllers;
 
@@ -77,7 +78,7 @@ public class EmployeesController : ControllerBase
     {
         var companyExists = await _context.Companies.AnyAsync(c => c.Id == dto.CompanyId);
         if (!companyExists)
-            return BadRequest(new OrgStructureApi.Dtos.ApiErrorResponse(400, "Validation Error", "Company not found."));
+            return BadRequest(new ApiErrorResponse(400, "Validation Error", "Company not found."));
 
         if (await _context.Employees.AnyAsync(e => e.Email == dto.Email))
             return Conflict(new OrgStructureApi.Dtos.ApiErrorResponse(409, "Conflict", "Email already in use by another employee."));
@@ -95,7 +96,14 @@ public class EmployeesController : ControllerBase
         };
 
         _context.Employees.Add(employee);
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return Conflict(new ApiErrorResponse(409, "Conflict", "Email or Phone already in use by another employee."));
+        }
 
         return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee);
     }
@@ -111,8 +119,13 @@ public class EmployeesController : ControllerBase
         if (employee.CompanyId.HasValue && employee.CompanyId != dto.CompanyId)
         {
             if (await IsLeaderOrDirectorInCompany(id, employee.CompanyId))
-                return BadRequest("Cannot change company for an employee who is a leader or director.");
+                return BadRequest(new ApiErrorResponse(400, "Validation Error", "Cannot change company for an employee who is a leader or director."));
         }
+
+        // validate target company exists
+        var targetCompanyExists = await _context.Companies.AnyAsync(c => c.Id == dto.CompanyId);
+        if (!targetCompanyExists)
+            return BadRequest(new ApiErrorResponse(400, "Validation Error", "Company not found."));
 
         employee.Title = dto.Title;
         employee.FirstName = dto.FirstName;
@@ -126,7 +139,15 @@ public class EmployeesController : ControllerBase
         employee.Email = dto.Email;
         employee.CompanyId = dto.CompanyId;
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return Conflict(new ApiErrorResponse(409, "Conflict", "Email or Phone already in use by another employee."));
+        }
+
         return NoContent();
     }
 
@@ -140,7 +161,15 @@ public class EmployeesController : ControllerBase
         if (updatedFields.CompanyId.HasValue && employee.CompanyId.HasValue && employee.CompanyId != updatedFields.CompanyId.Value)
         {
             if (await IsLeaderOrDirectorInCompany(id, employee.CompanyId))
-                return BadRequest("Cannot change company for an employee who is a leader or director.");
+                return BadRequest(new ApiErrorResponse(400, "Validation Error", "Cannot change company for an employee who is a leader or director."));
+        }
+
+        // if companyId provided, ensure it exists
+        if (updatedFields.CompanyId.HasValue)
+        {
+            var companyExists = await _context.Companies.AnyAsync(c => c.Id == updatedFields.CompanyId.Value);
+            if (!companyExists)
+                return BadRequest(new ApiErrorResponse(400, "Validation Error", "Company not found."));
         }
 
         if (!string.IsNullOrEmpty(updatedFields.Title))
@@ -169,8 +198,15 @@ public class EmployeesController : ControllerBase
         if (updatedFields.CompanyId.HasValue)
             employee.CompanyId = updatedFields.CompanyId.Value;
 
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return Conflict(new ApiErrorResponse(409, "Conflict", "Email or Phone already in use by another employee."));
+        }
 
-        await _context.SaveChangesAsync();
         return NoContent();
     }
 
