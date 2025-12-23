@@ -1,0 +1,7 @@
+###
+# @name GetEmployees
+GET http://localhost:5086/api/employees
+
+###
+# @name GetEmployee1
+GET http://localhost:5086/api/employees/1
