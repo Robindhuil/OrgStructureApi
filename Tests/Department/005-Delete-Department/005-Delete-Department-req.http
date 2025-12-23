@@ -1,0 +1,15 @@
+###
+# @name DeleteDepartment1
+DELETE http://localhost:5086/api/department/1
+
+###
+# @name GetDepartment1AfterDelete
+GET http://localhost:5086/api/department/1
+
+###
+# @name DeleteDepartment1Again
+DELETE http://localhost:5086/api/department/1
+
+###
+# @name DeleteDepartmentNonExist
+DELETE http://localhost:5086/api/department/999999

@@ -1,0 +1,15 @@
+###
+# @name DeleteProject1
+DELETE http://localhost:5086/api/project/1
+
+###
+# @name GetProject1AfterDelete
+GET http://localhost:5086/api/project/1
+
+###
+# @name DeleteProject1Again
+DELETE http://localhost:5086/api/project/1
+
+###
+# @name DeleteProjectNonExist
+DELETE http://localhost:5086/api/project/999999

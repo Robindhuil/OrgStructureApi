@@ -1,0 +1,15 @@
+###
+# @name DeleteDivision1
+DELETE http://localhost:5086/api/division/1
+
+###
+# @name GetDivision1AfterDelete
+GET http://localhost:5086/api/division/1
+
+###
+# @name DeleteDivision1Again
+DELETE http://localhost:5086/api/division/1
+
+###
+# @name DeleteDivisionNonExist
+DELETE http://localhost:5086/api/division/999999
