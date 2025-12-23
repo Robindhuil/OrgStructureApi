@@ -1,0 +1,56 @@
+###
+# @name CreateDepartmentOk
+POST http://localhost:5086/api/department
+Content-Type: application/json
+
+{
+  "name": "Test Department A",
+  "code": "DEPT-UNQ-1",
+  "projectId": 1,
+  "leaderId": null
+}
+
+###
+# @name CreateDepartmentDuplicateCode
+POST http://localhost:5086/api/department
+Content-Type: application/json
+
+{
+  "name": "Duplicate Department",
+  "code": "DEPT-UNQ-1",
+  "projectId": 1,
+  "leaderId": null
+}
+
+###
+# @name CreateDepartmentMissingName
+POST http://localhost:5086/api/department
+Content-Type: application/json
+
+{
+  "code": "MISSING-NAME",
+  "projectId": 1
+}
+
+###
+# @name CreateDepartmentProjectNotFound
+POST http://localhost:5086/api/department
+Content-Type: application/json
+
+{
+  "name": "Dept For Missing Project",
+  "code": "DEPT-MISS-PROJ",
+  "projectId": 999999
+}
+
+###
+# @name CreateDepartmentLeaderNotFound
+POST http://localhost:5086/api/department
+Content-Type: application/json
+
+{
+  "name": "Dept With Missing Leader",
+  "code": "DEPT-MISS-LEAD",
+  "projectId": 1,
+  "leaderId": 999999
+}

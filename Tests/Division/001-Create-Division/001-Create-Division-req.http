@@ -1,0 +1,56 @@
+###
+# @name CreateDivisionOk
+POST http://localhost:5086/api/division
+Content-Type: application/json
+
+{
+  "name": "Test Division A",
+  "code": "DIV-UNQ-1",
+  "companyId": 1,
+  "leaderId": null
+}
+
+###
+# @name CreateDivisionDuplicateCode
+POST http://localhost:5086/api/division
+Content-Type: application/json
+
+{
+  "name": "Duplicate Division",
+  "code": "DIV-UNQ-1",
+  "companyId": 1,
+  "leaderId": null
+}
+
+###
+# @name CreateDivisionMissingName
+POST http://localhost:5086/api/division
+Content-Type: application/json
+
+{
+  "code": "MISSING-NAME",
+  "companyId": 1
+}
+
+###
+# @name CreateDivisionCompanyNotFound
+POST http://localhost:5086/api/division
+Content-Type: application/json
+
+{
+  "name": "Div For Missing Company",
+  "code": "DIV-MISS-COMP",
+  "companyId": 999999
+}
+
+###
+# @name CreateDivisionLeaderNotFound
+POST http://localhost:5086/api/division
+Content-Type: application/json
+
+{
+  "name": "Div With Missing Leader",
+  "code": "DIV-MISS-LEAD",
+  "companyId": 1,
+  "leaderId": 999999
+}

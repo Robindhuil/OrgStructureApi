@@ -1,0 +1,56 @@
+###
+# @name CreateProjectOk
+POST http://localhost:5086/api/project
+Content-Type: application/json
+
+{
+  "name": "Test Project A",
+  "code": "PROJ-UNQ-1",
+  "divisionId": 1,
+  "leaderId": null
+}
+
+###
+# @name CreateProjectDuplicateCode
+POST http://localhost:5086/api/project
+Content-Type: application/json
+
+{
+  "name": "Duplicate Project",
+  "code": "PROJ-UNQ-1",
+  "divisionId": 1,
+  "leaderId": null
+}
+
+###
+# @name CreateProjectMissingName
+POST http://localhost:5086/api/project
+Content-Type: application/json
+
+{
+  "code": "MISSING-NAME",
+  "divisionId": 1
+}
+
+###
+# @name CreateProjectDivisionNotFound
+POST http://localhost:5086/api/project
+Content-Type: application/json
+
+{
+  "name": "Proj For Missing Division",
+  "code": "PROJ-MISS-DIV",
+  "divisionId": 999999
+}
+
+###
+# @name CreateProjectLeaderNotFound
+POST http://localhost:5086/api/project
+Content-Type: application/json
+
+{
+  "name": "Proj With Missing Leader",
+  "code": "PROJ-MISS-LEAD",
+  "divisionId": 1,
+  "leaderId": 999999
+}
