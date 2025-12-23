@@ -1,0 +1,7 @@
+###
+# @name GetDepartments
+GET http://localhost:5086/api/department
+
+###
+# @name GetDepartmentById
+GET http://localhost:5086/api/department/1

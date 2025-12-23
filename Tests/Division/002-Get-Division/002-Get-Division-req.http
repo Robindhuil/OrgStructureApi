@@ -1,0 +1,7 @@
+###
+# @name GetDivisions
+GET http://localhost:5086/api/division
+
+###
+# @name GetDivisionById
+GET http://localhost:5086/api/division/1

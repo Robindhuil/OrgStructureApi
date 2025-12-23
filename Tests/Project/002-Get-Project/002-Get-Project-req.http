@@ -1,0 +1,7 @@
+###
+# @name GetProjects
+GET http://localhost:5086/api/project
+
+###
+# @name GetProjectById
+GET http://localhost:5086/api/project/1
