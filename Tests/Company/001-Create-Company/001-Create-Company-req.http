@@ -1,0 +1,53 @@
+###
+# @name CreateCompanyOk
+POST http://localhost:5086/api/company
+Content-Type: application/json
+
+{
+  "name": "Test Company Inc",
+  "code": "TEST-COMP-UNQ",
+  "directorId": null
+}
+
+###
+# @name CreateCompanyDuplicateCode
+POST http://localhost:5086/api/company
+Content-Type: application/json
+
+{
+  "name": "Duplicate Company",
+  "code": "TEST-COMP-UNQ",
+  "directorId": null
+}
+
+###
+# @name CreateCompanyMissingName
+POST http://localhost:5086/api/company
+Content-Type: application/json
+
+{
+  "code": "MISSING-NAME",
+  "directorId": null
+}
+
+###
+# @name CreateCompanyLongName
+POST http://localhost:5086/api/company
+Content-Type: application/json
+
+{
+  "name": "This company name is deliberately made excessively long to trigger validation and exceed the one hundred character limit enforced by the DTO in tests",
+  "code": "LONG-NAME",
+  "directorId": null
+}
+
+###
+# @name CreateCompanyDirectorNotFound
+POST http://localhost:5086/api/company
+Content-Type: application/json
+
+{
+  "name": "Company With Missing Director",
+  "code": "MISSING-DIR",
+  "directorId": 999999
+}
