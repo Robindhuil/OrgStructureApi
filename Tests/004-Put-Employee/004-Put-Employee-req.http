@@ -1,0 +1,71 @@
+###
+# @name PutEmployeeOk
+PUT http://localhost:5086/api/employees/1
+Content-Type: application/json
+
+{
+  "title": "Ing.",
+  "firstName": "Jan",
+  "lastName": "Novak",
+  "phone": "0999000009",
+  "email": "put.email@test.sk",
+  "companyId": 1
+}
+
+###
+# @name GetPutEmployee1
+GET http://localhost:5086/api/employees/1
+
+###
+# @name PutEmployeeDuplicateEmail
+PUT http://localhost:5086/api/employees/2
+Content-Type: application/json
+
+{
+  "title": "Mgr.",
+  "firstName": "Peter",
+  "lastName": "Mrkvicka",
+  "phone": "0999000010",
+  "email": "unique.email@test.sk",
+  "companyId": 1
+}
+
+###
+# @name GetPutEmployee2
+GET http://localhost:5086/api/employees/2
+
+###
+# @name PutEmployeeDuplicatePhone
+PUT http://localhost:5086/api/employees/3
+Content-Type: application/json
+
+{
+  "title": "Bc.",
+  "firstName": "Eva",
+  "lastName": "Hruskova",
+  "phone": "0999000001",
+  "email": "eva.put@test.sk",
+  "companyId": 1
+}
+
+###
+# @name GetPutEmployee3
+GET http://localhost:5086/api/employees/3
+
+###
+# @name PutEmployeeChangeCompanyLeader
+PUT http://localhost:5086/api/employees/1
+Content-Type: application/json
+
+{
+  "title": "Ing.",
+  "firstName": "Jan",
+  "lastName": "Novak",
+  "phone": "0999000009",
+  "email": "put.email@test.sk",
+  "companyId": 2
+}
+
+###
+# @name GetPutEmployee1AfterChange
+GET http://localhost:5086/api/employees/1

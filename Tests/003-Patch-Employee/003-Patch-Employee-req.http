@@ -1,0 +1,51 @@
+###
+# @name PatchEmployeeOk
+PATCH http://localhost:5086/api/employees/1
+Content-Type: application/json
+
+{
+  "email": "patched.email@test.sk"
+}
+
+###
+# @name GetPatchedEmployee1
+GET http://localhost:5086/api/employees/1
+
+###
+# @name PatchEmployeeDuplicateEmail
+PATCH http://localhost:5086/api/employees/2
+Content-Type: application/json
+
+{
+  "email": "unique.email@test.sk"
+}
+
+###
+# @name GetPatchedEmployee2
+GET http://localhost:5086/api/employees/2
+
+###
+# @name PatchEmployeeDuplicatePhone
+PATCH http://localhost:5086/api/employees/3
+Content-Type: application/json
+
+{
+  "phone": "0999000001"
+}
+
+###
+# @name GetPatchedEmployee3
+GET http://localhost:5086/api/employees/3
+
+###
+# @name PatchEmployeeChangeCompanyLeader
+PATCH http://localhost:5086/api/employees/1
+Content-Type: application/json
+
+{
+  "companyId": 2
+}
+
+###
+# @name GetPatchedEmployee1AfterChange
+GET http://localhost:5086/api/employees/1
